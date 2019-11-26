@@ -3,6 +3,7 @@ package com.hyecheon.eatgo.interfaces
 import com.hyecheon.eatgo.application.RestaurantService
 import com.hyecheon.eatgo.domain.MenuItem
 import com.hyecheon.eatgo.domain.Restaurant
+import com.hyecheon.eatgo.domain.RestaurantNoFoundException
 import org.hamcrest.core.StringContains.containsString
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
@@ -13,8 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest(RestaurantController::class)
@@ -44,7 +44,7 @@ internal class RestaurantControllerTest {
 	}
 
 	@Test
-	internal fun detail() {
+	internal fun detailWithExisted() {
 		given(restaurantService.getRestaurant(1004))
 				.willReturn(
 						Restaurant(1004, "Bob zip", "Seoul")
@@ -74,10 +74,18 @@ internal class RestaurantControllerTest {
 	}
 
 	@Test
-	internal fun create() {
+	internal fun detailWithNotExisted() {
+		given(restaurantService.getRestaurant(404)).willThrow(RestaurantNoFoundException(404))
+		mvc.perform(get("/restaurants/404"))
+				.andExpect(status().isNotFound)
+				.andExpect(content().string("{}"))
+	}
+
+	@Test
+	internal fun createWithValidData() {
 		mvc.perform(post("/restaurants")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
 							{
 							"name":"BeRyong",
 							"address":"Seoul"
@@ -88,6 +96,42 @@ internal class RestaurantControllerTest {
 				.andExpect(content().string("{}"))
 
 		verify(restaurantService).addRestaurant(any())
+	}
+
+	@Test
+	internal fun createWithInvalidData() {
+		mvc.perform(post("/restaurants")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+							{
+							"name":"",
+							"address":""
+							}
+						""".trimIndent()))
+				.andExpect(status().isBadRequest)
+	}
+
+	@Test
+	internal fun updateWithValidData() {
+		mvc.perform(patch("/restaurants/1004")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{"name":"JOKER Bar","address":"Busan"}
+				""".trimIndent()))
+				.andExpect(status().isOk)
+
+		verify(restaurantService).updateRestaurant(1004, "JOKER Bar", "Busan")
+
+	}
+
+	@Test
+	internal fun updateWithInvalidData() {
+		mvc.perform(patch("/restaurants/1004")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{"name":"","address":""}
+				""".trimIndent()))
+				.andExpect(status().isBadRequest)
 	}
 
 	private fun <T> any(): T {

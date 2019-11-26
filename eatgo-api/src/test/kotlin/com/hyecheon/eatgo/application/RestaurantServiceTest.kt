@@ -1,6 +1,7 @@
 package com.hyecheon.eatgo.application
 
 import com.hyecheon.eatgo.domain.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,12 +48,19 @@ internal class RestaurantServiceTest {
 	}
 
 	@Test
-	internal fun getRestaurant() {
+	internal fun getRestaurantWithExisted() {
 		val restaurant = restaurantService.getRestaurant(1004)
 		assertEquals(restaurant.getId(), 1004)
 		val menuItems = restaurant.menuItems
 		val menuItem = menuItems[0]
 		assertEquals(menuItem.name, "Kimchi")
+	}
+
+	@Test
+	internal fun getRestaurantWithNotExisted() {
+		assertThrows(RestaurantNoFoundException::class.java) {
+			restaurantService.getRestaurant(404)
+		}
 	}
 
 	@Test
@@ -72,6 +80,15 @@ internal class RestaurantServiceTest {
 
 		assertEquals(created.getId(), 1234)
 
+	}
+
+	@Test
+	internal fun updateRestaurant() {
+		val restaurant = Restaurant(1004, "Bob zip", "Seoul")
+		restaurantService.addRestaurant(restaurant)
+		val updated = restaurantService.updateRestaurant(1004, "Sool zip", "Busan")
+		var found = restaurantService.getRestaurant(1004)
+		assertEquals(updated, found)
 	}
 
 	private fun <T> any(): T {
