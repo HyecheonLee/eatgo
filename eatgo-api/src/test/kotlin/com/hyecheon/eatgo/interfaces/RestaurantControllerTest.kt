@@ -6,6 +6,7 @@ import com.hyecheon.eatgo.domain.Restaurant
 import com.hyecheon.eatgo.domain.RestaurantNoFoundException
 import org.hamcrest.core.StringContains.containsString
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
@@ -13,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
+@ExtendWith(SpringExtension::class)
 @WebMvcTest(RestaurantController::class)
 internal class RestaurantControllerTest {
 
@@ -48,7 +51,7 @@ internal class RestaurantControllerTest {
 		given(restaurantService.getRestaurant(1004))
 				.willReturn(
 						Restaurant(1004, "Bob zip", "Seoul")
-								.apply { addMenuItem(MenuItem("Kimchi")) })
+								.apply { addMenuItem(MenuItem(name = "Kimchi")) })
 		given(restaurantService.getRestaurant(2020))
 				.willReturn(Restaurant(2020, "Cyber Food", "Seoul"))
 		mvc.perform(get("/restaurants/1004"))
@@ -80,6 +83,7 @@ internal class RestaurantControllerTest {
 				.andExpect(status().isNotFound)
 				.andExpect(content().string("{}"))
 	}
+
 
 	@Test
 	internal fun createWithValidData() {

@@ -32,7 +32,7 @@ internal class RestaurantServiceTest {
 
 	private fun mockMenuItemRepository() {
 		val menuItems: MutableList<MenuItem> = mutableListOf()
-		menuItems.add(MenuItem("Kimchi"))
+		menuItems.add(MenuItem(name = "Kimchi"))
 		given(menuItemRepository.findAllByRestaurantId(1004)).willReturn(menuItems)
 	}
 

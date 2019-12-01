@@ -5,7 +5,7 @@ import javax.persistence.Id
 import javax.validation.constraints.NotEmpty
 
 @Entity
-class Restaurant {
+class Restaurant() {
 	@Id
 	private var id: Long? = null
 	@NotEmpty
@@ -17,13 +17,13 @@ class Restaurant {
 	@Transient
 	val menuItems: MutableList<MenuItem> = mutableListOf()
 
-	constructor(id: Long?, name: String, address: String) {
+	constructor(id: Long?, name: String, address: String) : this() {
 		this.id = id
 		this.name = name
 		this.address = address
 	}
 
-	constructor(name: String, address: String) {
+	constructor(name: String, address: String) : this() {
 		this.name = name
 		this.address = address
 	}
