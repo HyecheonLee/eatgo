@@ -1,13 +1,16 @@
 package com.hyecheon.eatgo.application
 
 import com.hyecheon.eatgo.domain.*
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.*
 
@@ -20,14 +23,16 @@ internal class RestaurantServiceTest {
 
 	@Mock
 	private lateinit var menuItemRepository: MenuItemRepository
+	@Mock
+	private lateinit var reviewRepository: ReviewRepository
 
 	@BeforeEach
 	internal fun setUp() {
 		MockitoAnnotations.initMocks(this)
 		mockRestaurantRepository()
 		mockMenuItemRepository()
-
-		restaurantService = RestaurantService(restaurantRepository, menuItemRepository)
+		mockReviewRepository()
+		restaurantService = RestaurantService(restaurantRepository, menuItemRepository, reviewRepository)
 	}
 
 	private fun mockMenuItemRepository() {
@@ -47,13 +52,26 @@ internal class RestaurantServiceTest {
 
 	}
 
+	private fun mockReviewRepository() {
+		val reviews = mutableListOf<Review>()
+		reviews.add(Review(name = "BeRyong", score = 1, description = "Bad"))
+		given(reviewRepository.findAllByRestaurantId(1004L)).willReturn(reviews)
+	}
+
 	@Test
 	internal fun getRestaurantWithExisted() {
 		val restaurant = restaurantService.getRestaurant(1004)
+
+		verify(menuItemRepository).findAllByRestaurantId(eq(1004L))
+		verify(reviewRepository).findAllByRestaurantId(eq(1004L))
+
 		assertEquals(restaurant.getId(), 1004)
 		val menuItems = restaurant.menuItems
 		val menuItem = menuItems[0]
 		assertEquals(menuItem.name, "Kimchi")
+
+		val review = restaurant.reviews[0]
+		assertThat(review.description).isEqualTo("Bad")
 	}
 
 	@Test
@@ -71,7 +89,7 @@ internal class RestaurantServiceTest {
 
 	@Test
 	internal fun addRestaurant() {
-		val restaurant = Restaurant("BeRyong", "Busan")
+		val restaurant = Restaurant(name = "BeRyong", address = "Busan")
 		val saved = Restaurant(1234, "BeRyong", "Busan")
 
 		given(restaurantRepository.save(any())).willReturn(saved)

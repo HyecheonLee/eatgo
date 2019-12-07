@@ -1,7 +1,6 @@
 package com.hyecheon.eatgo.domain
 
-import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RestaurantTests {
@@ -17,7 +16,7 @@ internal class RestaurantTests {
 
 	@Test
 	internal fun information() {
-		val restaurant = Restaurant("Bob zip", "Seoul")
+		val restaurant = Restaurant(name = "Bob zip", address = "Seoul")
 		assertEquals(restaurant.getInformation(), "Bob zip in Seoul")
 	}
 }

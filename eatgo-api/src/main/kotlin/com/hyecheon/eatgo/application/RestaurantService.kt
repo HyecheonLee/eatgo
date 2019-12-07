@@ -1,17 +1,15 @@
 package com.hyecheon.eatgo.application
 
-import com.hyecheon.eatgo.domain.MenuItemRepository
-import com.hyecheon.eatgo.domain.Restaurant
-import com.hyecheon.eatgo.domain.RestaurantNoFoundException
-import com.hyecheon.eatgo.domain.RestaurantRepository
+import com.hyecheon.eatgo.domain.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.RuntimeException
 
 @Service
 @Transactional
 class RestaurantService(private val restaurantRepository: RestaurantRepository,
-                        private val menuItemRepository: MenuItemRepository) {
+                        private val menuItemRepository: MenuItemRepository,
+                        private val reviewRepository: ReviewRepository
+) {
 
 
 	@Transactional(readOnly = true)
@@ -23,6 +21,9 @@ class RestaurantService(private val restaurantRepository: RestaurantRepository,
 		}?.let {
 			restaurant.setMenuItem(it)
 		}
+		val reviews = reviewRepository.findAllByRestaurantId(id)
+		restaurant.setReviews(*reviews.toTypedArray())
+
 		return restaurant
 	}
 

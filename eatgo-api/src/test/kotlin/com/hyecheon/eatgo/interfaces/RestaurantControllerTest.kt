@@ -4,6 +4,7 @@ import com.hyecheon.eatgo.application.RestaurantService
 import com.hyecheon.eatgo.domain.MenuItem
 import com.hyecheon.eatgo.domain.Restaurant
 import com.hyecheon.eatgo.domain.RestaurantNoFoundException
+import com.hyecheon.eatgo.domain.Review
 import org.hamcrest.core.StringContains.containsString
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -48,12 +49,14 @@ internal class RestaurantControllerTest {
 
 	@Test
 	internal fun detailWithExisted() {
+		val restaurant = Restaurant(1004, "Bob zip", "Seoul")
+				.apply { addMenuItem(MenuItem(name = "Kimchi")) }
+		val review = Review(name = "JOKER", score = 5, description = "Great!")
+		restaurant.setReviews(review)
 		given(restaurantService.getRestaurant(1004))
 				.willReturn(
-						Restaurant(1004, "Bob zip", "Seoul")
-								.apply { addMenuItem(MenuItem(name = "Kimchi")) })
-		given(restaurantService.getRestaurant(2020))
-				.willReturn(Restaurant(2020, "Cyber Food", "Seoul"))
+						restaurant)
+
 		mvc.perform(get("/restaurants/1004"))
 				.andExpect(status().isOk)
 				.andExpect(content().string(containsString("""
@@ -65,15 +68,10 @@ internal class RestaurantControllerTest {
 				.andExpect((content().string(
 						containsString("Kimchi")
 				)))
+				.andExpect(content().string(
+						containsString("Great!")
+				))
 
-		mvc.perform(get("/restaurants/2020"))
-				.andExpect(status().isOk)
-				.andExpect(content().string(containsString("""
-					"name":"Cyber Food"
-				""".trimIndent())))
-				.andExpect(content().string(containsString("""
-					"id":2020
-				""".trimIndent())))
 	}
 
 	@Test

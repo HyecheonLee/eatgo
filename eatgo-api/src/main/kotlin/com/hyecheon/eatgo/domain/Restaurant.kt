@@ -1,5 +1,6 @@
 package com.hyecheon.eatgo.domain
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.validation.constraints.NotEmpty
@@ -13,17 +14,16 @@ class Restaurant() {
 	@NotEmpty
 	var address: String = ""
 
-
 	@Transient
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	val menuItems: MutableList<MenuItem> = mutableListOf()
 
-	constructor(id: Long?, name: String, address: String) : this() {
-		this.id = id
-		this.name = name
-		this.address = address
-	}
+	@Transient
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	val reviews: MutableList<Review> = mutableListOf()
 
-	constructor(name: String, address: String) : this() {
+	constructor(id: Long? = null, name: String = "", address: String = "") : this() {
+		this.id = id
 		this.name = name
 		this.address = address
 	}
@@ -37,5 +37,9 @@ class Restaurant() {
 
 	fun setMenuItem(menuItems: List<MenuItem>) {
 		menuItems.forEach { addMenuItem(it) }
+	}
+
+	fun setReviews(vararg reviews: Review) {
+		reviews.forEach { this.reviews.add(it) }
 	}
 }
